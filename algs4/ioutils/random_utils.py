@@ -1,5 +1,5 @@
 import random
-from math import sqrt, log
+from math import sqrt, log, ceil, exp
 
 
 class StdRandom:
@@ -58,41 +58,46 @@ class StdRandom:
                 break
         return x * sqrt(-2 * log(1 - r2) / r2) * sigma + mu
 
+    @staticmethod
+    def poisson(lam):
+        exp_lam = exp(-lam)
+        k = 0
+        p = 1
+        while p >= exp_lam:
+            k += 1
+            p *= StdRandom.uniform()
+        return k - 1
+
 
 def main():
-    import pandas
+    import pandas as pd
     import matplotlib.pyplot as plt
-    N = 10000
-    rfloats = [StdRandom.uniform() for _ in range(N)]
-    rseries = pandas.Series(rfloats)
-    print("describe uniform() %d: %s" % (N, rseries.describe()))
-    n = 100
-    rints = [StdRandom.uniform_int(100) for _ in range(N)]
-    rseries = pandas.Series(rints)
-    print("describe: uniform(%d), %d: %s" % (n, N, rseries.describe()))
-    a, b = 20, 1200
-    rints = [StdRandom.uniform_int_range(a, b) for _ in range(N)]
-    rseries = pandas.Series(rints)
-    print("describe: uniform_int_range(%d, %d), %d: %s" % (a, b, N, rseries.describe()))
-
-    a, b = 20.8, 1200.3
-    rfloats = [StdRandom.uniform_range(a, b) for _ in range(N)]
-    rseries = pandas.Series(rfloats)
-    print("describe: uniform_range(%s, %s), %d: %s" % (a, b, n, rseries.describe()))
-
+    test_functions = []
+    N = 1000000
+    a = -5
+    b = 23
+    test_functions.append((lambda: StdRandom.uniform_range(a, b), "uniform(%s, %s)" % (a, b)))
+    test_functions.append((lambda: StdRandom.uniform_int_range(a, b), "uniform_int(%d, %d)" % (a, b)))
     p = 0.8
-    avg = sum([StdRandom.bernoulli(p) for _ in range(N)]) / N
-    print("bernoulli %s avg: %s" % (p, avg))
+    test_functions.append((lambda: StdRandom.bernoulli(p), "bernoulli(%s)" % p))
+    mu = 33.3
+    sigma = 44.4
+    test_functions.append((lambda: StdRandom.gaussian(mu, sigma), "gaussian(%s, %s)" % (mu, sigma)))
+    lam = 1
+    test_functions.append((lambda: StdRandom.poisson(lam), "poisson(%s)" % lam))
+    func_count = len(test_functions)
+    w = ceil(sqrt(func_count))
+    h = ceil(func_count / w)
+    n_bins = 100
+    fig, axs = plt.subplots(h, w, tight_layout=True)
+    for i, (func, desc) in enumerate(test_functions):
+        rfloats = [func() for _ in range(N)]
+        y, x = i // w, i % w
+        ax = axs[y][x]
+        ax.hist(rfloats, bins=n_bins)
+        ax.set_title(desc)
 
-    mu = 3.4
-    sigma = 2.8
-    rfloats = [StdRandom.gaussian(mu, sigma) for _ in range(N)]
-    rseries = pandas.Series(rfloats)
-    print("describe: gaussian(%s, %s), %s" % (mu, sigma, rseries.describe()))
-    n_bins = 20
-    fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
-    axs[0].hist(rfloats, bins=n_bins)
-    plt.show()
+    plt.show(block=True)
 
 
 if __name__ == "__main__":
