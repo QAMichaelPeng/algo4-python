@@ -45,7 +45,7 @@ class StdRandom:
 
     @staticmethod
     def bernoulli(p: float = 0.5):
-        return StdRandom.uniform() < p
+        return 1 if StdRandom.uniform() < p else 0
 
     @staticmethod
     def gaussian(mu=0, sigma=1):
@@ -70,7 +70,6 @@ class StdRandom:
 
 
 def main():
-    import pandas as pd
     import matplotlib.pyplot as plt
     test_functions = []
     N = 1000000
