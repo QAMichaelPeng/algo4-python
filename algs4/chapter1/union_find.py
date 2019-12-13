@@ -48,10 +48,13 @@ class UnionFindCompressedQuickUnion:
         if p == parent:
             self.access_count += 1
             return p
-        parent = self.find(parent)
-        self.parents[p] = parent
-        self.access_count += 2
-        return parent
+        new_parent = self.find(parent)
+        if new_parent != parent:
+            self.parents[p] = new_parent
+            self.access_count += 2
+        else:
+            self.access_count += 1
+        return new_parent
 
     def union(self, p, q):
         old = self.access_count
@@ -130,10 +133,13 @@ class UnionFindCompressedWeightedQuickUnion:
         if p == parent:
             self.access_count += 1
             return p
-        parent = self.find(parent)
-        self.parents[p] = parent
-        self.access_count += 2
-        return parent
+        new_parent = self.find(parent)
+        if new_parent != parent:
+            self.parents[p] = new_parent
+            self.access_count += 2
+        else:
+            self.access_count += 1
+        return new_parent
 
     def union(self, p, q):
         old = self.access_count
@@ -265,6 +271,8 @@ if __name__ == "__main__":
             x, y = map(int, line.split())
             uf.union(x, y)
         print("%d connected components" % uf.component_count)
+        print("access %d times in %d iterations" % (uf.access_count, len(uf.costs)))
+
         plt.scatter(range(1, 1 + len(uf.costs)), uf.costs, c="0.75", marker=".")
         plt.scatter(range(1, 1 + len(uf.costs)), uf.average_costs, c="red", marker=".")
         plt.show(block=True)
