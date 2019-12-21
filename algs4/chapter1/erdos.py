@@ -1,6 +1,6 @@
 from functools import reduce
 
-from algs4.ioutils.random_utils import StdRandom
+from algs4.commonutils.random_utils import StdRandom
 from .union_find import UnionFindCompressedWeightedQuickUnion
 
 
